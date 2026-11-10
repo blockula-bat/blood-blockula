@@ -1,0 +1,7 @@
+[package]
+name = "blood-verification"
+version = "0.1.0"
+edition = "2024"
+[workspace]
+[dependencies]
+blockula-vm = { path = "../../../tmp/blockula-account-link-2026-11-10/node/vm", features = ["testing"] }

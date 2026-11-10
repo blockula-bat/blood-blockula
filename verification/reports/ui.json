@@ -1,0 +1,21 @@
+{
+  "creatorFeesPaid": "11073197",
+  "checkedAt": "2026-11-10T17:34:23.260Z",
+  "base": "http://127.0.0.1:4173",
+  "testAccount": "boo1pqhcsh9nd8r3e8u8e34z83g3g65vvhlps5yhj77ez9pxg9fmwtsqrz7je5",
+  "tests": [
+    "live buy",
+    "live sell",
+    "live add liquidity",
+    "live remove liquidity",
+    "desktop render",
+    "mobile render",
+    "protocol navigation",
+    "no page errors"
+  ],
+  "physicalPasskey": "OS prompt not exercised: PRF emulated in test harness only",
+  "dimensions": {
+    "viewport": 390,
+    "document": 390
+  }
+}

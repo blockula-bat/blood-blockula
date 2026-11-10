@@ -1,0 +1,29 @@
+{
+  "name": "BLOOD",
+  "symbol": "BLOOD",
+  "decimals": 9,
+  "totalSupply": "1000000000000000",
+  "chainId": "blockula-demo-2",
+  "genesisHash": "e712d9376917f0c9d10c164fa7c1a53fef7c8dc1c24100e7924037d0250f705e",
+  "rpc": "https://demo.blockula.app",
+  "address": "boo1d9r5ph0e7k2vezt0tp2ns3wqvs2psyhcrmelzjfl4990xtuj8qvs96nq80",
+  "versionDigest": "aeef65ba7df1dd1e439510475df12af848e7fe170167dd76e79d696bc308e5a5",
+  "wasmHash": "7a983de4115aa10146d3a95dadb4102f90446ce9530bc5727bafd34555061ae5",
+  "interfaceHash": "3184f3fb26f75a79f2d72c93f02d8a358580bddeae3fe75a915a5f3cbc5495c3",
+  "deployTx": "5628a0f9e84c9a2b43c8571e12b69a8a7044879c5f66d665fb209f3da76eade9",
+  "seedTx": "2eb76c4b9046fe12bf0bf4dbaf20bb3e5e49b4e10bc5c32cfd57de36e1fc71ab",
+  "creator": "boo1pq9qa328a7teh8chphrf479p9gu6y766wtp4zg5cmyxdnjnu6r9sxlcsez",
+  "personalAccount": "boo19vhu6sf33wg73qwt7f7knrg9entqxkzqksgzzpkhcsjeprh7ehfszhfmfc",
+  "feeBps": 100,
+  "feeRecipient": "boo19vhu6sf33wg73qwt7f7knrg9entqxkzqksgzzpkhcsjeprh7ehfszhfmfc",
+  "feeMode": "native-fang-direct",
+  "initialPool": {
+    "fang": "100",
+    "blood": "100000"
+  },
+  "allocation": {
+    "personalBlood": "900000",
+    "poolBlood": "100000"
+  },
+  "createdAt": "2026-11-10T17:30:46.658Z"
+}

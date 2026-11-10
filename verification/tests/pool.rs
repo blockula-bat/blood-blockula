@@ -1,0 +1,26 @@
+use blockula_vm::{engine::EngineKind,exec::{Call,Receipt,TxLimits,execute,ANY_VERSION},host::{MethodKind,View},meter::SCHEDULE_V0,testing::{MemHost,addr}};
+const U:u64=1_000_000_000;
+struct Chain { h:MemHost }
+impl Chain {
+ fn new()->Self {let mut h=MemHost::new();h.deploy(addr("blood"),&std::fs::read("../artifacts/blood.wasm").unwrap());for name in ["alice","bob","eve","treasury"]{h.fund(addr(name),10_000*U);}let mut c=Self{h};assert!(c.tx("alice","init",addr("treasury").to_vec(),0).ok());c}
+ fn tx(&mut self,who:&str,method:&str,input:Vec<u8>,value:u64)->Receipt{
+ let call=self.h.bind(Call{program:addr("blood"),version_digest:ANY_VERSION,method:method.into(),input,value,kind:MethodKind::Call});
+ let (engine,_)=self.h.engine_for(EngineKind::ALL[0],&SCHEDULE_V0,&[addr("blood")]).unwrap();
+ let r=execute(engine.as_ref(),&self.h,addr(who),&[call],&[],TxLimits{fuel_limit:10_000_000,storage_limit:U},&SCHEDULE_V0).unwrap();if r.ok(){let total=self.h.total();self.h.apply(&r.diff);assert_eq!(self.h.total(),total);self.invariants();}else{assert_eq!(r.diff,Default::default());}r
+ }
+ fn ok(&mut self,w:&str,m:&str,v:Vec<u8>,n:u64)->Receipt{let r=self.tx(w,m,v,n);assert!(r.ok(),"{m}: {:?}",r.fail);r}
+ fn get(&self,k:&[u8])->Vec<u8>{self.h.storage(&addr("blood"),k).map(|x|x.value).unwrap_or_default()}
+ fn reserves(&self)->[u64;3]{let r=self.get(b"r");[le(&r[0..8]),le(&r[8..16]),le(&r[16..24])]}
+ fn bal(&self,t:u8,w:&str)->u64{let d=self.get(&[&[t],addr(w).as_slice()].concat());if d.is_empty(){0}else{le(&d)}}
+ fn invariants(&self){if self.get(b"r").is_empty(){return}let p=self.reserves();assert_eq!(self.h.balance(&addr("blood")).unwrap(),p[0]);let mut token=p[1] as u128;let mut lp=if p[2]>0{1000u128}else{0};for((prog,k),v)in &self.h.storage{if *prog==addr("blood")&&k.len()==33{if k[0]==b'b'{token+=le(&v.value)as u128;}if k[0]==b'l'{lp+=le(&v.value)as u128;}}}assert_eq!(token,1_000_000*U as u128);assert_eq!(lp,p[2]as u128);}
+ fn seed(&mut self){self.ok("alice","add_liquidity",enc(&[100_000*U,1,10000]),100*U);}
+}
+fn le(v:&[u8])->u64{u64::from_le_bytes(v.try_into().unwrap())}
+fn enc(a:&[u64])->Vec<u8>{a.iter().flat_map(|n|n.to_le_bytes()).collect()}
+fn tx_to(a:&str,n:u64)->Vec<u8>{[addr(a).to_vec(),enc(&[n])].concat()}
+#[test] fn swaps_fees_and_lp_round_trip(){big(||{let mut c=Chain::new();c.seed();let p=c.reserves();let k=p[0]as u128*p[1]as u128;let treasury_before=c.h.balance(&addr("treasury")).unwrap();let b=c.ok("bob","buy",enc(&[1,10000]),U);let bought=le(&b.returns[0]);assert_eq!(c.h.balance(&addr("treasury")).unwrap(),treasury_before+U/100);assert_eq!(bought,((U-U/100) as u128*p[1]as u128/(p[0]as u128+(U-U/100)as u128))as u64);assert!(c.reserves()[0]as u128*c.reserves()[1]as u128>=k);let before_sell=c.reserves();let gross=bought as u128*before_sell[0]as u128/(before_sell[1]as u128+bought as u128);c.ok("bob","sell",enc(&[bought,1,10000]),0);assert_eq!(c.h.balance(&addr("treasury")).unwrap(),treasury_before+U/100+gross as u64/100);assert!(c.h.balance(&addr("bob")).unwrap()<10_000*U);let lp=c.bal(b'l',"alice");c.ok("alice","remove_liquidity",enc(&[lp,1,1,10000]),0);assert_eq!(c.reserves()[2],1000);});}
+#[test] fn failures_roll_back_value_and_state(){big(||{let mut c=Chain::new();c.seed();for(m,d,v)in[("buy",enc(&[u64::MAX,10000]),U),("sell",enc(&[U,1,10000]),0),("buy",enc(&[1,0]),U),("remove_liquidity",enc(&[u64::MAX,0,0,10000]),0),("buy",vec![0],U),("init",vec![],0)]{let before=c.h.clone();assert!(!c.tx("bob",m,d,v).ok());assert_eq!(before,c.h);} });}
+#[test] fn allowances_and_self_transfer(){big(||{let mut c=Chain::new();c.ok("alice","approve",tx_to("bob",100*U),0);assert!(!c.tx("alice","approve",tx_to("bob",200*U),0).ok());let d=[addr("alice").to_vec(),addr("eve").to_vec(),enc(&[100*U])].concat();assert!(!c.tx("eve","transfer_from",d.clone(),0).ok());c.ok("bob","transfer_from",d.clone(),0);assert!(!c.tx("bob","transfer_from",d,0).ok());assert_eq!(c.bal(b'b',"eve"),100*U);c.ok("eve","transfer",tx_to("eve",100*U),0);assert_eq!(c.bal(b'b',"eve"),100*U);});}
+#[test] fn randomized_swaps_and_liquidity_conserve_assets(){big(||{let mut c=Chain::new();c.seed();let mut rng=1234567u64;for i in 0..100{rng=rng.wrapping_mul(6364136223846793005).wrapping_add(1);let input=1+rng%(2*U);c.ok("bob","buy",enc(&[1,10000]),input);let tokens=c.bal(b'b',"bob");if i%3==0{c.ok("bob","add_liquidity",enc(&[tokens/2,1,10000]),U);let shares=c.bal(b'l',"bob");c.ok("bob","remove_liquidity",enc(&[shares,1,1,10000]),0);}let tokens=c.bal(b'b',"bob");c.ok("bob","sell",enc(&[tokens,1,10000]),0);}});}
+#[test] fn proportional_liquidity_refunds_excess_fang(){big(||{let mut c=Chain::new();c.seed();c.ok("alice","transfer",tx_to("bob",1000*U),0);let native=c.h.balance(&addr("bob")).unwrap();c.ok("bob","add_liquidity",enc(&[1000*U,1,10000]),10*U);assert!(c.h.balance(&addr("bob")).unwrap()>native-2*U);assert_eq!(c.reserves()[0],101*U);});}
+fn big(f:impl FnOnce()+Send){std::thread::scope(|s|std::thread::Builder::new().stack_size(64<<20).spawn_scoped(s,f).unwrap().join().unwrap());}

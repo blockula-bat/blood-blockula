@@ -1,0 +1,6 @@
+node_modules/
+dist/
+contract/target/
+verification/target/
+.private/
+*.log

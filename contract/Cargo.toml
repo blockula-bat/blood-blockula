@@ -1,0 +1,19 @@
+[package]
+name = "blood"
+version = "1.0.0"
+edition = "2024"
+publish = false
+[lib]
+crate-type = ["cdylib"]
+[dependencies]
+abi = { path = "abi" }
+[workspace]
+members = ["abi"]
+[profile.release]
+opt-level = "z"
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+debug = false
+strip = true
+overflow-checks = true
