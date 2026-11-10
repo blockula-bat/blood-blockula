@@ -1,13 +1,13 @@
 {
-  "checkedAt": "2026-11-10T17:52:35.923Z",
-  "base": "http://127.0.0.1:4173",
+  "checkedAt": "2026-11-10T17:54:32.031Z",
+  "base": "https://blood-on-blockula.effervescentlily2.chatgpt.site",
   "quote": "424,948.370441465 BLOOD + approximately 754.424729123 FANG at the current pool ratio.",
   "account": "boo19vhu6sf33wg73qwt7f7knrg9entqxkzqksgzzpkhcsjeprh7ehfszhfmfc",
   "tests": [
     "50% live quote renders",
     "correct owner prefilled",
     "owner-device instructions visible",
-    "no signing or POST without owner approval",
+    "no chain mutation POST without owner approval",
     "mobile width 390px",
     "no page errors"
   ]
