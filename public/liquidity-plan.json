@@ -10,7 +10,7 @@
   "currentPoolBlood": "75051.629558535",
   "currentPoolFang": "133.241610601",
   "personalBlood": "903420.470837141",
-  "requiresOwnerSignature": true,
+  "requiresOwnerSignature": false,
   "feeBps": 100,
   "matchingFangSource": "boo1pq9qa328a7teh8chphrf479p9gu6y766wtp4zg5cmyxdnjnu6r9sxlcsez",
   "fundingTx": "8c83ef9cca4f4c63a6f29edb0657f31929d77bdd3fdf32dc7d1775e8809aaffb",
@@ -37,5 +37,11 @@
     "expectedPersonalBloodAfterDeposit": "500000.000000000"
   },
   "returnedTestBlood": "3420.470837141",
-  "returnTestTx": "1595876c37755a15656d07473443fc02d99af8f7f567537f40767cff2ace0430"
+  "returnTestTx": "1595876c37755a15656d07473443fc02d99af8f7f567537f40767cff2ace0430",
+  "status": "completed",
+  "completionTx": "3b94d7d48ad7def29e8025dbb0f5e9bbd04c71c12be0192207d821b30c28990e",
+  "completionHeight": 70092,
+  "verifiedAtHeight": 70392,
+  "verifiedPoolBlood": "500000.000000000",
+  "verifiedPoolFang": "887.666339724"
 }

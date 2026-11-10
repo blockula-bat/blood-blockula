@@ -41,8 +41,9 @@ Contract source, built WASM/interface and public deployment manifest are include
 - Explorer: https://demo.blockula.app/#/program/boo1d9r5ph0e7k2vezt0tp2ns3wqvs2psyhcrmelzjfl4990xtuj8qvs96nq80
 - Program source: `contract/src/lib.rs`. Built WASM/interface: `artifacts/`.
 - 1% of buys and sells goes directly to the fixed treasury in native FANG; no separate LP fee.
-- Requested 50%-supply pool target is prepared in `/?setup=50`, but requires the personal
-  account's owner signature. Check live state, not an old quote, before depositing.
+- The personal account completed the 50%-supply liquidity addition at block 70092.
+  The pool held 500,000 BLOOD at verification block 70392; future swaps change reserves.
+  The one-off setup banner is retired. Normal liquidity controls remain available.
 
 ## Contributing
 
