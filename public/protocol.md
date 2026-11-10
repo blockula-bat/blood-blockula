@@ -20,6 +20,18 @@ current token, even though it has the same display symbol. Always compare the pr
 - Token transfers, reset-before-change allowances, and delegated transfers are supported.
 - No contract admin, mutable treasury, emergency drain, or upgrade authority.
 
+## Requested 50% pool allocation (pending owner signature)
+
+Darkoh requested increasing the main pool to 500,000 BLOOD (50% of fixed supply).
+The /?setup=50 page computes the missing BLOOD and matching FANG at the live pool ratio,
+then prepares a normal proportional add_liquidity call. It does not silently move tokens.
+The remaining BLOOD is held by the personal passkey account; the spending-only agent key
+cannot sign program calls. Darkoh must approve the deposit with an owner key.
+Matching demo FANG has been topped up from the locally managed demo wallet.
+New LP shares belong to the depositing personal wallet and remain withdrawable.
+Swaps can change the fraction of supply held by the pool after the deposit; 50% is a setup
+target, not a permanently enforced reserve percentage or a token/LP lock.
+
 ## Trading fees — 1% to Darkoh
 
 Treasury: darkohh.boo, boo19vhu6sf33wg73qwt7f7knrg9entqxkzqksgzzpkhcsjeprh7ehfszhfmfc.

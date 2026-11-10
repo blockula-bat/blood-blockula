@@ -9,3 +9,5 @@ export function minOut(n,bps){return n*(10000n-BigInt(bps))/10000n;}
 export function encode(...numbers){const b=new Uint8Array(numbers.length*8);const v=new DataView(b.buffer);numbers.forEach((n,i)=>{if(BigInt(n)<0n||BigInt(n)>U64)throw Error('Integer overflow');v.setBigUint64(i*8,BigInt(n),true);});return b;}
 export function readLE(hex){if(!hex)return 0n;const b=Uint8Array.from(hex.match(/../g).map(x=>parseInt(x,16)));return new DataView(b.buffer).getBigUint64(0,true);}
 export function liquidity(n,maxToken,p){const [f,t,l]=p;if(l===0n)throw Error('Pool has not been initialized.');let token=(n*t+f-1n)/f;let used=n;if(token>maxToken){token=maxToken;used=(token*f+t-1n)/t;}const shares=[used*l/f,token*l/t].reduce((a,b)=>a<b?a:b);return {token,used,shares};}
+// Proportional deposit: cap BLOOD exactly at the missing target balance.
+export function targetLiquidity(p,target){const [f,t,l]=p;if(f<=0n||t<=0n||l<=0n)throw Error('Pool has not been initialized.');if(target<=t)return {token:0n,fang:0n,shares:0n};const token=target-t;const fang=(token*f+t-1n)/t;return {token,fang,shares:liquidity(fang,token,p).shares};}
