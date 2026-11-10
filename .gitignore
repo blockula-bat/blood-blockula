@@ -4,3 +4,16 @@ contract/target/
 verification/target/
 .private/
 *.log
+
+# Credentials, wallets and local signing material — never publish.
+.env
+.env.*
+!.env.example
+secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+agent-wallet.json
+darkoh-demo-wallet.json
+.DS_Store

@@ -17,9 +17,8 @@ cargo test --manifest-path verification/Cargo.toml
 npm run build
 ```
 
-VM tests currently reference the pinned Blockula checkout at
-`../../tmp/blockula-account-link-2026-11-10` relative to the project root
-(commit 865c81dab9ce79f0cdfc95db986338720b1e3cef).
+VM tests fetch Blockula from its public GitHub repository, pinned to
+commit `865c81dab9ce79f0cdfc95db986338720b1e3cef`. No local sibling checkout is required.
 The verification harness uses Blockula's actual VM with its in-memory chain host.
 
 The production site is static and talks directly to the public demo RPC via CORS. No hosting
@@ -33,3 +32,26 @@ or frontend. Do not rerun unresolved signed actions; inspect their receipts firs
 
 The copied ABI adapter is MIT ©2026 Jack Dishman; see contract/abi/LICENSE.
 Contract source, built WASM/interface and public deployment manifest are included for review.
+
+
+## Live demo and contract
+
+- Website: https://blood-on-blockula.effervescentlily2.chatgpt.site (public, no ChatGPT sign-in).
+- Current immutable program: `boo1d9r5ph0e7k2vezt0tp2ns3wqvs2psyhcrmelzjfl4990xtuj8qvs96nq80`.
+- Explorer: https://demo.blockula.app/#/program/boo1d9r5ph0e7k2vezt0tp2ns3wqvs2psyhcrmelzjfl4990xtuj8qvs96nq80
+- Program source: `contract/src/lib.rs`. Built WASM/interface: `artifacts/`.
+- 1% of buys and sells goes directly to the fixed treasury in native FANG; no separate LP fee.
+- Requested 50%-supply pool target is prepared in `/?setup=50`, but requires the personal
+  account's owner signature. Check live state, not an old quote, before depositing.
+
+## Contributing
+
+Fork and open a pull request, or push a branch if you have collaborator access.
+Start with `npm ci --ignore-scripts`, `npm run dev`, and `npm test`.
+`npm run contract` builds WASM; `cargo test --manifest-path verification/Cargo.toml`
+runs the actual Blockula VM tests. Deployment helpers are operator-only, not part of the UI.
+
+GitHub pushes do not automatically change the live website. The Sites publisher still needs
+an authenticated source push, a saved build version and a deployment. Changes to contract logic
+cannot upgrade the existing immutable program: they need a separately reviewed deployment.
+Never commit `.private/`, wallet files, environment credentials, seeds or recovery material.

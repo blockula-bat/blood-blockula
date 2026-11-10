@@ -36,6 +36,7 @@ dependencies = [
 [[package]]
 name = "blockula-vm"
 version = "0.1.0"
+source = "git+https://github.com/jackdishman/blockula.git?rev=865c81dab9ce79f0cdfc95db986338720b1e3cef#865c81dab9ce79f0cdfc95db986338720b1e3cef"
 dependencies = [
  "blake3",
  "soroban-wasmi",
