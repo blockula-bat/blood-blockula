@@ -1,8 +1,7 @@
 {
   "project_id": "appgprj_6af353f978988191852bc6604e5b994d",
   "static": {
-    "directory": "dist",
-    "binding": "ASSETS"
+    "directory": "dist"
   },
   "expected_url": "https://blood-on-blockula.effervescentlily2.chatgpt.site"
 }
