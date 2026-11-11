@@ -1,0 +1,8 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {decode,apply,rebuild} from '../src/history.mjs';
+const P='boo1d9r5ph0e7k2vezt0tp2ns3wqvs2psyhcrmelzjfl4990xtuj8qvs96nq80';
+const fx=JSON.parse(readFileSync(new URL('./fixtures/pool-txs.json',import.meta.url)));const live=fx.live.map(BigInt);
+const ops=fx.txs.slice().reverse().flatMap(t=>decode(t,P));
+test('decodes swap and liquidity events, skipping token transfers',()=>{assert.equal(ops.length,20);const count=m=>ops.filter(o=>o.method===m).length;assert.deepEqual([count('buy'),count('sell'),count('add_liquidity'),count('remove_liquidity')],[6,4,6,4]);const sell=ops.find(o=>o.method==='sell');assert.equal(sell.buy,false);assert.equal(sell.n,100000000000n);assert.equal(sell.tax,1018869n);assert.equal(sell.out,101886905n-1018869n);});
+test('forward replay from zero reproduces live reserves exactly',()=>{const r=rebuild(ops,live,108029);assert.equal(r.mode,'complete');assert.deepEqual(r.points.at(-1).p,live);assert.deepEqual(r.points[0].p,[100000000000n,100000000000000n,3162277660168n]);const vol=r.points.reduce((a,p)=>a+p.vol,0n);assert.equal(vol,34418389403n);});
+test('rewinding from live after pruning matches the forward states',()=>{const full=rebuild(ops,live,108029).points;for(let k=1;k<ops.length;k++){const r=rebuild(ops.slice(k),live,108029);assert.equal(r.mode,'rewound');assert.deepEqual(r.points[0].p,full[k-1].p);r.points.slice(1).forEach((p,i)=>assert.deepEqual(p.p,full[k+i].p));}});
+test('mismatched live reserves are rejected',()=>{assert.throws(()=>rebuild(ops,[live[0]+1n,live[1],live[2]],108029),/does not match/);assert.throws(()=>apply([1n,1n,1n],ops.find(o=>o.method==='buy')),/mismatch/);});

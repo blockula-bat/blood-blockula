@@ -82,6 +82,7 @@ Touch ID / Face ID prompt is not automated or certified by these tests.
 Pool reads use the demo node's paginated storage API because its public program-view endpoint
 is disabled. These are RPC-reported values, not independently verified storage proofs.
 The SDK pins chain id, genesis, prefix, program version digest and immutable authority.
-The displayed reserve curve is illustrative, not price history.
+Price, liquidity and volume charts are rebuilt from the pool program's finalized transactions on the demo node,
+replaying the contract's integer math and checked against live reserves; history is limited to what the node retains.
 
 Experimental, unaudited software. Demo FANG and BLOOD have no represented cash value.
