@@ -12,7 +12,7 @@ export function poolHistory(rpc,program){
   try{
    const fresh=[];let before='',done=false;
    for(let i=0;i<200&&!done;i++){
-    const r=await fetch(`${rpc}/api/account/${program}/txs?limit=100${before?'&before='+before:''}`);if(!r.ok)throw Error(`Pool history unavailable (${r.status}).`);const page=await r.json();
+    const r=await fetch(`${rpc}/api/account/${program}/txs?limit=100${before?'&before='+before:''}`,{cache:'no-store'});if(!r.ok)throw Error(`Pool history unavailable (${r.status}).`);const page=await r.json();
     for(const tx of page.txs){if(scanned!==null&&tx.height<=scanned){done=true;break;}fresh.push(tx);}
     if(!page.next)done=true;else before=page.next;
    }
@@ -25,16 +25,25 @@ export function poolHistory(rpc,program){
  };
  return h;
 }
+// Keep the state immediately before a time window as its baseline, not the launch-day price.
+export function chartWindow(points,clock,liveHeight,windowMs=DAY){
+ const all=points.map(p=>({...p,t:clock(p.height)}));
+ if(!all.length)return {pts:[],t0:clock(liveHeight),t1:clock(liveHeight)+1};
+ const t1=Math.max(clock(liveHeight),all.at(-1).t+1),t0=windowMs?Math.max(all[0].t,t1-windowMs):all[0].t;
+ const before=all.filter(p=>p.t<t0).at(-1),pts=all.filter(p=>p.t>=t0);
+ if(before)pts.unshift({...before,t:t0,vol:0n,method:'start',id:null});
+ return {pts,t0,t1};
+}
 const el=(tag,attrs,text)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;return e;};
 // Draw `view` ('price'|'liquidity'|'volume'); returns hover handler data.
-export function drawChart(svg,view,history,clock,live,liveHeight){
+export function drawChart(svg,view,history,clock,live,liveHeight,windowMs=DAY){
  svg.replaceChildren(el('defs',{}),el('path',{class:'grid',d:'M0 30H512M0 80H512M0 130H512M0 180H512'}));
  svg.firstChild.innerHTML='<linearGradient id="fade" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f04455" stop-opacity=".2"/><stop offset="1" stop-color="#f04455" stop-opacity="0"/></linearGradient>';
  const res=history.result;
  if(!res||!live){svg.append(el('text',{x:256,y:100,class:'chart-empty'},history.error?'Pool history unavailable · retrying':'Loading pool history…'));return null;}
  if(!res.points.length){svg.append(el('text',{x:256,y:100,class:'chart-empty'},'No pool activity yet'));return null;}
- const pts=res.points.map(p=>({...p,t:clock(p.height)})),t0=pts[0].t,t1=Math.max(clock(liveHeight),pts.at(-1).t+1),x=t=>(t-t0)/(t1-t0)*W;
- const yScale=(lo,hi)=>{if(hi===lo){lo*=.95;hi*=1.05;}const pad=(hi-lo)*.12;lo=Math.max(0,lo-pad);hi+=pad;return v=>BOT-(v-lo)/(hi-lo)*(BOT-TOP);};
+ const {pts,t0,t1}=chartWindow(res.points,clock,liveHeight,windowMs),x=t=>(t-t0)/(t1-t0)*W;
+ const yScale=(lo,hi)=>{if(hi===lo){const pad=Math.max(Math.abs(lo)*.05,1e-12);lo-=pad;hi+=pad;}const pad=(hi-lo)*.12;lo=Math.max(0,lo-pad);hi+=pad;return v=>BOT-(v-lo)/(hi-lo)*(BOT-TOP);};
  if(view==='volume'){
   const span=t1-t0,size=[3e5,9e5,36e5,72e5,144e5,432e5,DAY,7*DAY].find(s=>span/s<=48)||7*DAY,n=Math.ceil(span/size),bars=Array.from({length:n},(_,i)=>({t:t0+i*size,end:Math.min(t1,t0+(i+1)*size),v:0n,swaps:0}));
   for(const p of pts)if(p.vol){const b=bars[Math.min(n-1,Math.floor((p.t-t0)/size))];b.v+=p.vol;b.swaps++;}
